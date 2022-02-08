@@ -1,61 +1,30 @@
 import datetime
-import urllib2
+import urllib.request
 import gzip
 
 # sonde_2007-05-30-00.txt.gz
-start = datetime.datetime.strptime("2009-01-01", "%Y-%m-%d")
-start = datetime.datetime.strptime("2001-01-01", "%Y-%m-%d")
-end = datetime.datetime.strptime("2002-12-31", "%Y-%m-%d")
-dates = [start + datetime.timedelta(hours=12*hd) for hd in range(0, (end-start).days*2)]
-
-for iday in range(len(dates)):import datetime
-import urllib2
-import gzip
-
-# sonde_2007-05-30-00.txt.gz
-start = datetime.datetime.strptime("2009-01-01", "%Y-%m-%d")
-start = datetime.datetime.strptime("2001-01-01", "%Y-%m-%d")
-end = datetime.datetime.strptime("2002-12-31", "%Y-%m-%d")
+start = datetime.datetime.strptime("2018-01-01", "%Y-%m-%d")
+end = datetime.datetime.strptime("2018-01-02", "%Y-%m-%d")
 dates = [start + datetime.timedelta(hours=12*hd) for hd in range(0, (end-start).days*2)]
 
 for iday in range(len(dates)):
     d = dates[iday]
     print(d)
-    url = 'http://weather.uwyo.edu/cgi-bin/sounding?region=seasia&TYPE=TEXT%3ALIST&YEAR={:0>4d}&MONTH={:0>2d}&FROM={:0>2d}{:0>2d}&TO={:0>2d}{:0>2d}&STNM=96685'.format(d.year,d.month,d.day,d.hour,d.day,d.hour)
+    url = 'http://weather.uwyo.edu/cgi-bin/sounding?region=pac&TYPE=TEXT%3ALIST&YEAR={:0>4d}&MONTH={:0>2d}&FROM={:0>2d}{:0>2d}&TO={:0>2d}{:0>2d}&STNM=94866'.format(d.year,d.month,d.day,d.hour,d.day,d.hour)
     print(url)
-    response = urllib2.urlopen(url)
+    response = urllib.request.urlopen(url)
     html = response.read()
-    ## check if any sonde data is available - if not, go to next date
-    if html.find('Radiosonde') < 0:
+#     check if any sonde data is available - if not, go to next date
+    if html.find('Radiosonde'.encode()) < 0:
         print('no data available')
         continue
 
     ##
     print(d)
-    splithtml = html.split('\n')
-    lastline = [i for i in range(len(splithtml)) if splithtml[i] == '</PRE>' ][0]
-    idxs = [i for i in range(0,lastline) if splithtml[i].find('<') == -1 ]
-    out = [splithtml[i] for i in idxs]
-    filename = 'sonde_{:0>4d}-{:0>2d}-{:0>2d}-{:0>2d}.txt.gz'.format(d.year,d.month,d.day,d.hour)
-    outfile = gzip.open(filename, "w")
-    res = [outfile.write("%s\n" % splithtml[i]) for i in idxs]
-    outfile.close()
-    d = dates[iday]
-    print(d)
-    url = 'http://weather.uwyo.edu/cgi-bin/sounding?region=seasia&TYPE=TEXT%3ALIST&YEAR={:0>4d}&MONTH={:0>2d}&FROM={:0>2d}{:0>2d}&TO={:0>2d}{:0>2d}&STNM=96685'.format(d.year,d.month,d.day,d.hour,d.day,d.hour)
-    print(url)
-    response = urllib2.urlopen(url)
-    html = response.read()
-    ## check if any sonde data is available - if not, go to next date
-    if html.find('Radiosonde') < 0:
-        print('no data available')
-        continue
-
-    ##
-    print(d)
-    splithtml = html.split('\n')
-    lastline = [i for i in range(len(splithtml)) if splithtml[i] == '</PRE>' ][0]
-    idxs = [i for i in range(0,lastline) if splithtml[i].find('<') == -1 ]
+    splithtml = html.split('\n'.encode())
+    print(splithtml)
+    lastline = [i for i in range(len(splithtml)) if splithtml[i] == '</PRE>' ]
+    idxs = [i for i in range(0,lastline) if splithtml[i].find('<'.encode()) == -1 ]
     out = [splithtml[i] for i in idxs]
     filename = 'sonde_{:0>4d}-{:0>2d}-{:0>2d}-{:0>2d}.txt.gz'.format(d.year,d.month,d.day,d.hour)
     outfile = gzip.open(filename, "w")
